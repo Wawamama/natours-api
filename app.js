@@ -15,6 +15,7 @@ const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
 const reviewRouter = require('./routes/reviewRoutes')
 
+// start express app
 const app = express();
 
 app.set('view engine', 'pug')
