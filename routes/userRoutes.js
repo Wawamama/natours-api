@@ -2,6 +2,7 @@ const express = require('express')
 const userController = require('./../controllers/userController')
 const authController = require('./../controllers/authController')
 
+
 const router = express.Router()
 
 router.post('/signup', authController.signUp)
@@ -22,7 +23,10 @@ router.get('/me',
     userController.getUser
 )
 
+// updateMe route : we include a middleware that uses mutler to upload images
+// 'photo' has to be the name of the field in the html form
 router.patch('/updateMe', 
+    userController.uploadUserPhoto,
     userController.updateMe
 )
 router.delete('/deleteMe', 
