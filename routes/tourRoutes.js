@@ -1,6 +1,6 @@
 const express = require('express')
-// Using destructuring to get the functions
-const { getAllTours, createTour, getTour, updateTour, deleteTour, checkID, checkBody, aliasTopTours, getTourStats, getMonthlyPlan, getTourWithin, getDistances } = require('./../controllers/tourController')
+// Using destructuring to get the functions (not the best idea)
+const { getAllTours, createTour, getTour, updateTour, deleteTour, checkID, checkBody, aliasTopTours, getTourStats, getMonthlyPlan, getTourWithin, getDistances, resizeTourImages, uploadTourImages } = require('./../controllers/tourController')
 const { protect, restrictTo } = require('./../controllers/authController')
 const reviewRouter = require('./reviewRoutes')
 
@@ -44,6 +44,8 @@ router.route('/:id')
     .patch(
         protect, 
         restrictTo('admin', 'lead-guide'), 
+        uploadTourImages,
+        resizeTourImages,
         updateTour
     )
     .delete(

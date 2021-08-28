@@ -2,10 +2,70 @@ const AppError = require('../util/appError')
 const Tour = require('./../models/tourModel')
 const catchAsync = require('./../util/catchAsync')
 const factory = require('./handlerFactory')
+const multer = require('multer') // upload images
+const sharp = require('sharp') // resize images
+
 
 // import data from a json file :
 // const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`))
 
+
+// MULTER (upload images)
+const multerStorage = multer.memoryStorage()
+
+// Only allow images files
+const multerFilter = (req, file, callback) => {
+    if (file.mimetype.startsWith('image')) {
+        callback(null, true)
+    } else {
+        callback(new AppError('Not an image. Please upload only images', 400), false)
+    }
+}
+
+// Create function to upload images (multer)
+const upload = multer({
+    storage: multerStorage,
+    fileFilter: multerFilter
+})
+
+exports.uploadTourImages = upload.fields([
+    { name: 'imageCover', maxCount: 1 },
+    { name: 'images', maxCount: 3 }
+])
+
+exports.resizeTourImages = catchAsync( async (req, res, next) => {
+    if (!req.files.imageCover || !req.files.images) return next()
+    
+    // 1. Cover Images
+    const imageCoverFilename = `tour-${req.params.id}-${Date.now()}-cover.jpeg`
+    await sharp(req.files.imageCover[0].buffer)
+        .resize(200, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90}) 
+        .toFile(`public/img/tours/${imageCoverFilename}`)   
+
+    // Put the imageCoverFilename into the request body so it's updated when we call updateOne()
+    req.body.imageCover = imageCoverFilename 
+
+    // 2. Images
+    req.body.images = []
+
+    // We use .map() to create an array full of promises and then call Promise.all
+    await Promise.all(
+        req.files.images.map(async (img, idx) => {
+            const filename = `tour-${req.params.id}-${Date.now()}-${idx+1}.jpeg`
+
+            await sharp(img.buffer)
+                .resize(2000, 1333)
+                .toFormat('jpeg')
+                .jpeg({ quality: 80}) 
+                .toFile(`public/img/tours/${filename}`)   
+
+            req.body.images.push(filename)
+         })
+    )
+    next()
+})
 
 exports.aliasTopTours = (req, res, next) => {
     req.query.limit = '5'
