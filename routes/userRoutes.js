@@ -27,6 +27,7 @@ router.get('/me',
 // 'photo' has to be the name of the field in the html form
 router.patch('/updateMe', 
     userController.uploadUserPhoto,
+    userController.resizeUserPhoto,
     userController.updateMe
 )
 router.delete('/deleteMe', 
