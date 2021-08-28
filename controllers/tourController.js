@@ -50,7 +50,7 @@ exports.resizeTourImages = catchAsync( async (req, res, next) => {
     // 2. Images
     req.body.images = []
 
-    // We use .map() to create an array full of promises and then call Promise.all
+    // We use .map() to save the promises of sharp and then await them all with Promise.all()
     await Promise.all(
         req.files.images.map(async (img, idx) => {
             const filename = `tour-${req.params.id}-${Date.now()}-${idx+1}.jpeg`
@@ -61,6 +61,7 @@ exports.resizeTourImages = catchAsync( async (req, res, next) => {
                 .jpeg({ quality: 80}) 
                 .toFile(`public/img/tours/${filename}`)   
 
+            // Push the images in the array images in the request body
             req.body.images.push(filename)
          })
     )
